@@ -13,11 +13,45 @@ class TodoListViewController: UITableViewController{
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     var items = [Item]()
+    var selectedCategory: Category? {
+        didSet{
+            loadItems()
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadItems()
     }
+    
+    func saveItems() {
+        do {
+            try context.save()
+        }catch{
+            print("Something wrong when save context : \(error)")
+        }
+    }
+    
+    func loadItems(with predicate: NSPredicate? = nil ) {
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        
+        if let additionalPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+        }else {
+            request.predicate = categoryPredicate
+        }
+        
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        
+        do {
+            items = try context.fetch(request)
+        }catch {
+            print("try to fetch items error \(error)")
+        }
+    }
+    
+    // MARK: - tableView dataSource
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return items.count
     }
@@ -31,6 +65,8 @@ class TodoListViewController: UITableViewController{
         return cell
     }
     
+    // MARK: - tableview delegate
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt: IndexPath){
         items[didSelectRowAt.row].done = !items[didSelectRowAt.row].done
         self.saveItems()
@@ -38,7 +74,7 @@ class TodoListViewController: UITableViewController{
         tableView.deselectRow(at: didSelectRowAt, animated: true)
     }
     
-//MARK: - Add Items
+    //MARK: - Add Items
     
     @IBAction func AddButtonPressed(_ sender: UIBarButtonItem) {
         var newTextField: UITextField?
@@ -49,6 +85,7 @@ class TodoListViewController: UITableViewController{
                     let newItem = Item(context: self.context)
                     newItem.title = text
                     newItem.done = false
+                    newItem.parentCategory = self.selectedCategory
                     self.items.append(newItem)
                     self.saveItems()
                     self.tableView.reloadData()
@@ -64,34 +101,18 @@ class TodoListViewController: UITableViewController{
         
     }
     
-    func saveItems() {
-        do {
-            try context.save()
-        }catch{
-            print("Something wrong when save context : \(error)")
-        }
-    }
-    
-    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
-        do {
-            items = try context.fetch(request)
-        }catch {
-            print("try to fetch items error \(error)")
-        }
-    }
 }
 
 // MARK: - searchBar
 
 extension TodoListViewController: UISearchBarDelegate{
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        let request: NSFetchRequest<Item> = Item.fetchRequest()
-        request.predicate = NSPredicate(format: "title CONTAINS [cd] %@", searchBar.text!)
-        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        let predicate = NSPredicate(format: "title CONTAINS [cd] %@", searchBar.text!)
         
-        loadItems(with: request)
+        loadItems(with: predicate)
         tableView.reloadData()
     }
+    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text?.count == 0 {
             loadItems()
