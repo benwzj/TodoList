@@ -7,28 +7,37 @@
 
 import UIKit
 import CoreData
+import RealmSwift
 
 class CategoryViewController: UITableViewController {
+    // CoreData
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     var categorys = [Category]()
     
+    // Realm
+    let realm = try! Realm()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadCategory()
+        coreDataLoadCategory()
     }
 
-    func saveCategory(){
-        do {
-           try context.save()
-        }catch{
-           print("Something wrong when save context : \(error)")
-        }
-    }
-    func loadCategory(with request: NSFetchRequest<Category> = Category.fetchRequest()){
+    // CoreData
+    func coreDataLoadCategory(with request: NSFetchRequest<Category> = Category.fetchRequest()){
         do {
             categorys = try context.fetch(request)
         }catch {
             print("try to fetch items error \(error)")
+        }
+    }
+    func coreDataAddCategory(with name: String){
+        let newCategory = Category(context: self.context)
+        newCategory.name = name
+        categorys.append(newCategory)
+        do {
+           try context.save()
+        }catch{
+           print("Something wrong when save context : \(error)")
         }
     }
     
@@ -42,11 +51,7 @@ class CategoryViewController: UITableViewController {
         let alertAction = UIAlertAction (title: "Add Category", style: .default) { (action) in
             if let tf = newTextField {
                 if let text = tf.text{
-                    let newCategory = Category(context: self.context)
-                    newCategory.name = text
-                    print (text)
-                    self.categorys.append(newCategory)
-                    self.saveCategory()
+                    self.coreDataAddCategory(with: text)
                     self.tableView.reloadData()
                 }
             }

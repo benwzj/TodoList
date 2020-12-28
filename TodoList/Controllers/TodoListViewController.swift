@@ -11,7 +11,6 @@ import CoreData
 class TodoListViewController: UITableViewController{
 
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
     var items = [Item]()
     var selectedCategory: Category? {
         didSet{
