@@ -7,9 +7,15 @@
 
 import UIKit
 import CoreData
+import RealmSwift
 
 class TodoListViewController: UITableViewController{
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
+    
+    // CoreData
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     var items = [Item]()
     var selectedCategory: Category? {
@@ -17,11 +23,6 @@ class TodoListViewController: UITableViewController{
             loadItems()
         }
     }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-    
     func saveItems() {
         do {
             try context.save()
@@ -29,7 +30,14 @@ class TodoListViewController: UITableViewController{
             print("Something wrong when save context : \(error)")
         }
     }
-    
+    func addItem(with title: String){
+        let newItem = Item(context: self.context)
+        newItem.title = title
+        newItem.done = false
+        newItem.parentCategory = selectedCategory
+        items.append(newItem)
+        saveItems()
+    }
     func loadItems(with predicate: NSPredicate? = nil ) {
         let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
         let request: NSFetchRequest<Item> = Item.fetchRequest()
@@ -49,26 +57,84 @@ class TodoListViewController: UITableViewController{
         }
     }
     
+    // MARK: - realm
+    var selectedRealmCategory: RealmCategory? {
+        didSet {
+            realmLoadItems()
+        }
+    }
+    let realm = try! Realm()
+    var realmItems: Results<RealmItem>?
+    func realmSave(with item: RealmItem){
+        do {
+            try realm.write{
+                realm.add(item)
+            }
+        }catch{
+            print("something wrong when realmSave(): \(error)")
+        }
+    }
+    func realmAdd(with text: String){
+        if let currentCategory = selectedRealmCategory {
+            do {
+                try realm.write{
+                    let newItem = RealmItem()
+                    newItem.title = text
+                    currentCategory.items.append(newItem)
+                }
+            }catch{
+                print("Something wrong when realmAdd(): \(error)")
+            }
+        }
+    }
+    func realmLoadItems(){
+        realmItems = selectedRealmCategory?.items.sorted(byKeyPath: "title", ascending: true)
+    }
+    
     // MARK: - tableView dataSource
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return items.count
+        //return items.count
+        return realmItems?.count ?? 1
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TodoItemCell", for: indexPath)
-        let item = items[indexPath.row]
-        cell.textLabel?.text = item.title
-        cell.accessoryType = item.done ? .checkmark : .none
+        
+        // CoreData
+        //let item = items[indexPath.row]
+        //cell.textLabel?.text = item.title
+        //cell.accessoryType = item.done ? .checkmark : .none
 
+        // realm
+        if let item = realmItems?[indexPath.row]{
+            cell.textLabel?.text = item.title
+            cell.accessoryType = item.done ? .checkmark : .none
+        }else{
+            cell.textLabel?.text = "no item yet"
+        }
+        
         return cell
     }
     
     // MARK: - tableview delegate
     
     override func tableView(_ tableView: UITableView, didSelectRowAt: IndexPath){
-        items[didSelectRowAt.row].done = !items[didSelectRowAt.row].done
-        self.saveItems()
+        // CoreData
+        //items[didSelectRowAt.row].done = !items[didSelectRowAt.row].done
+        //self.saveItems()
+        
+        // realm
+        if let item = realmItems?[didSelectRowAt.row] {
+            do{
+                try realm.write{
+                    item.done = !item.done
+                }
+            }catch{
+                print ("Something wrong: \(error)")
+            }
+        }
+        
         tableView.reloadData()
         tableView.deselectRow(at: didSelectRowAt, animated: true)
     }
@@ -81,12 +147,8 @@ class TodoListViewController: UITableViewController{
         let alertAction = UIAlertAction (title: "Add Item", style: .default) { (action) in
             if let tf = newTextField {
                 if let text = tf.text{
-                    let newItem = Item(context: self.context)
-                    newItem.title = text
-                    newItem.done = false
-                    newItem.parentCategory = self.selectedCategory
-                    self.items.append(newItem)
-                    self.saveItems()
+                    // self.addItem(with: text)
+                    self.realmAdd(with: text)
                     self.tableView.reloadData()
                 }
             }
@@ -97,24 +159,24 @@ class TodoListViewController: UITableViewController{
             newTextField = textField
         }
         present(alertController, animated: true, completion: nil)
-        
     }
-    
 }
 
 // MARK: - searchBar
 
 extension TodoListViewController: UISearchBarDelegate{
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        let predicate = NSPredicate(format: "title CONTAINS [cd] %@", searchBar.text!)
+        //let predicate = NSPredicate(format: "title CONTAINS [cd] %@", searchBar.text!)
+        //loadItems(with: predicate)
         
-        loadItems(with: predicate)
         tableView.reloadData()
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text?.count == 0 {
-            loadItems()
+            
+            //loadItems()
+            
             tableView.reloadData()
             DispatchQueue.main.async {
                 searchBar.resignFirstResponder()

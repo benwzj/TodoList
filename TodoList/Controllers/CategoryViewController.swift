@@ -10,19 +10,15 @@ import CoreData
 import RealmSwift
 
 class CategoryViewController: UITableViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        //coreDataLoadCategory()
+        realmLoadCategory()
+    }
+    
     // CoreData
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     var categorys = [Category]()
-    
-    // Realm
-    let realm = try! Realm()
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        coreDataLoadCategory()
-    }
-
-    // CoreData
     func coreDataLoadCategory(with request: NSFetchRequest<Category> = Category.fetchRequest()){
         do {
             categorys = try context.fetch(request)
@@ -41,6 +37,25 @@ class CategoryViewController: UITableViewController {
         }
     }
     
+    // Realm
+    let realm = try! Realm()
+    var realmCategorys: Results<RealmCategory>?   // Results is a auto-update container type
+    func realmAddCategory (with name: String){
+        let newCategory = RealmCategory()
+        newCategory.name = name
+
+        do {
+            try realm.write{
+                realm.add(newCategory)
+            }
+        }catch{
+            print("something wrong when realm. write \(error)")
+        }
+    }
+    func realmLoadCategory (){
+        realmCategorys = realm.objects(RealmCategory.self)
+    }
+
     @IBAction func addCategory(_ sender: UIBarButtonItem) {
         var newTextField: UITextField?
         let alertController = UIAlertController(title: "Category", message: "", preferredStyle: .alert)
@@ -51,7 +66,8 @@ class CategoryViewController: UITableViewController {
         let alertAction = UIAlertAction (title: "Add Category", style: .default) { (action) in
             if let tf = newTextField {
                 if let text = tf.text{
-                    self.coreDataAddCategory(with: text)
+                    //self.coreDataAddCategory(with: text)
+                    self.realmAddCategory(with: text)
                     self.tableView.reloadData()
                 }
             }
@@ -63,15 +79,16 @@ class CategoryViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categorys.count
+        //return categorys.count
+        return realmCategorys?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
 
-        // Configure the cell...
-        let category = categorys[indexPath.row]
-        cell.textLabel?.text = category.name
+        //let text = categorys[indexPath.row].name
+        let text = realmCategorys?[indexPath.row].name ?? "no Category yet"
+        cell.textLabel?.text = text
 
         return cell
     }
@@ -85,7 +102,8 @@ class CategoryViewController: UITableViewController {
         let destinationVC =  segue.destination as! TodoListViewController
         
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.selectedCategory = categorys[indexPath.row]
+            //destinationVC.selectedCategory = categorys[indexPath.row]
+            destinationVC.selectedRealmCategory = realmCategorys?[indexPath.row]
         }
     }
 }
