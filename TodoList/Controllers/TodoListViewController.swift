@@ -80,6 +80,7 @@ class TodoListViewController: UITableViewController{
                 try realm.write{
                     let newItem = RealmItem()
                     newItem.title = text
+                    newItem.createdDate = Date()
                     currentCategory.items.append(newItem)
                 }
             }catch{
@@ -94,7 +95,10 @@ class TodoListViewController: UITableViewController{
     // MARK: - tableView dataSource
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        // coredata
         //return items.count
+        
+        // realm
         return realmItems?.count ?? 1
     }
 
@@ -147,8 +151,12 @@ class TodoListViewController: UITableViewController{
         let alertAction = UIAlertAction (title: "Add Item", style: .default) { (action) in
             if let tf = newTextField {
                 if let text = tf.text{
+                    //coredata
                     // self.addItem(with: text)
+                    
+                    //realm
                     self.realmAdd(with: text)
+                    
                     self.tableView.reloadData()
                 }
             }
@@ -166,16 +174,23 @@ class TodoListViewController: UITableViewController{
 
 extension TodoListViewController: UISearchBarDelegate{
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        // CoreData
         //let predicate = NSPredicate(format: "title CONTAINS [cd] %@", searchBar.text!)
         //loadItems(with: predicate)
+        
+        // realm
+        realmItems = realmItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "title", ascending: true)
         
         tableView.reloadData()
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text?.count == 0 {
-            
+            //CoreData
             //loadItems()
+            
+            // realm
+            realmLoadItems()
             
             tableView.reloadData()
             DispatchQueue.main.async {

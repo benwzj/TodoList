@@ -12,7 +12,10 @@ import RealmSwift
 class CategoryViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
+        //coredata
         //coreDataLoadCategory()
+        
+        //realm
         realmLoadCategory()
     }
     
@@ -66,8 +69,12 @@ class CategoryViewController: UITableViewController {
         let alertAction = UIAlertAction (title: "Add Category", style: .default) { (action) in
             if let tf = newTextField {
                 if let text = tf.text{
+                    //coredata
                     //self.coreDataAddCategory(with: text)
+                    
+                    //realm
                     self.realmAddCategory(with: text)
+                    
                     self.tableView.reloadData()
                 }
             }
@@ -79,14 +86,20 @@ class CategoryViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        //cordata
         //return categorys.count
+        
+        // realm
         return realmCategorys?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
 
+        // coredata
         //let text = categorys[indexPath.row].name
+        
+        // realm
         let text = realmCategorys?[indexPath.row].name ?? "no Category yet"
         cell.textLabel?.text = text
 
@@ -102,7 +115,10 @@ class CategoryViewController: UITableViewController {
         let destinationVC =  segue.destination as! TodoListViewController
         
         if let indexPath = tableView.indexPathForSelectedRow {
+            // coredata
             //destinationVC.selectedCategory = categorys[indexPath.row]
+            
+            // realm
             destinationVC.selectedRealmCategory = realmCategorys?[indexPath.row]
         }
     }
