@@ -7,6 +7,7 @@ target 'TodoList' do
 
   # Pods for TodoList
   pod 'RealmSwift'
+  pod 'SwipeCellKit'
 
   target 'TodoListTests' do
     inherit! :search_paths

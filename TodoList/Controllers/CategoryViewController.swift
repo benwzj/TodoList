@@ -9,9 +9,11 @@ import UIKit
 import CoreData
 import RealmSwift
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.rowHeight = 80.0
+        
         //coredata
         //coreDataLoadCategory()
         
@@ -94,8 +96,8 @@ class CategoryViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-
+        
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         // coredata
         //let text = categorys[indexPath.row].name
         
@@ -122,5 +124,16 @@ class CategoryViewController: UITableViewController {
             destinationVC.selectedRealmCategory = realmCategorys?[indexPath.row]
         }
     }
+    override func deleteCell(indexPath: IndexPath){
+        if let categorys = realmCategorys {
+            do{
+               try realm.write{
+                    realm.delete(categorys[indexPath.row])
+                }
+            }catch {
+                print("Someting wrong \(error)")
+            }
+            //tableView.reloadData()
+        }
+    }
 }
-

@@ -21,6 +21,7 @@
 		E4864E8F2592AE6F009C935F /* TodoListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4864E8E2592AE6F009C935F /* TodoListTests.swift */; };
 		E4864E9A2592AE6F009C935F /* TodoListUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4864E992592AE6F009C935F /* TodoListUITests.swift */; };
 		E4EF4B6A25956D3800527F12 /* CoreDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E4EF4B6825956D3800527F12 /* CoreDataModel.xcdatamodeld */; };
+		E4F64F06259C86BE00B8E9E8 /* SwipeTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F64F05259C86BE00B8E9E8 /* SwipeTableViewController.swift */; };
 		F92FE5F583CECD7DF7C8D404 /* Pods_TodoList_TodoListUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 356FF294EADBCCAEEA188AB0 /* Pods_TodoList_TodoListUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -68,6 +69,7 @@
 		E4864E992592AE6F009C935F /* TodoListUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListUITests.swift; sourceTree = "<group>"; };
 		E4864E9B2592AE6F009C935F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E4EF4B6925956D3800527F12 /* CoreDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreDataModel.xcdatamodel; sourceTree = "<group>"; };
+		E4F64F05259C86BE00B8E9E8 /* SwipeTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTableViewController.swift; sourceTree = "<group>"; };
 		EFEF6E84211B894E0A85A2CB /* Pods-TodoList.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TodoList.release.xcconfig"; path = "Target Support Files/Pods-TodoList/Pods-TodoList.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -137,6 +139,7 @@
 			children = (
 				E452131625984A91006D817A /* CategoryViewController.swift */,
 				E4864E7B2592AE6E009C935F /* TodoListViewController.swift */,
+				E4F64F05259C86BE00B8E9E8 /* SwipeTableViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -442,6 +445,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E4F64F06259C86BE00B8E9E8 /* SwipeTableViewController.swift in Sources */,
 				E452131725984A91006D817A /* CategoryViewController.swift in Sources */,
 				E4864E7C2592AE6E009C935F /* TodoListViewController.swift in Sources */,
 				E44CBBA02599F5BD00448280 /* RealmItem.swift in Sources */,

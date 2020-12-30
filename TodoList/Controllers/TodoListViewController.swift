@@ -9,10 +9,11 @@ import UIKit
 import CoreData
 import RealmSwift
 
-class TodoListViewController: UITableViewController{
+class TodoListViewController: SwipeTableViewController{
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.rowHeight = 80.0
     }
     
     // CoreData
@@ -103,7 +104,7 @@ class TodoListViewController: UITableViewController{
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TodoItemCell", for: indexPath)
+        let cell = super.tableView( tableView, cellForRowAt: indexPath)
         
         // CoreData
         //let item = items[indexPath.row]
@@ -167,6 +168,20 @@ class TodoListViewController: UITableViewController{
             newTextField = textField
         }
         present(alertController, animated: true, completion: nil)
+    }
+    
+    override func deleteCell(indexPath: IndexPath) {
+
+        if let items = realmItems {
+            do{
+               try realm.write{
+                    realm.delete(items[indexPath.row])
+                }
+            }catch {
+                print("Someting wrong at deleteCell items \(error)")
+            }
+            //self.tableView.reloadData()
+        }
     }
 }
 
