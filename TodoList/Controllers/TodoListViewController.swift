@@ -8,12 +8,23 @@
 import UIKit
 import CoreData
 import RealmSwift
+import ChameleonFramework
 
 class TodoListViewController: SwipeTableViewController{
 
+    @IBOutlet weak var searchBar: UISearchBar!
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.rowHeight = 80.0
+        if let colorHex = selectedRealmCategory?.color {
+            guard let navBar = navigationController?.navigationBar else{fatalError("NavigationBar don't exist")}
+            if let currColor = UIColor(hexString: colorHex){
+                navBar.backgroundColor = currColor
+                navBar.tintColor = ContrastColorOf(currColor, returnFlat: true)
+                navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: ContrastColorOf(currColor, returnFlat: true)]
+                searchBar.barTintColor = currColor
+            }
+        }
     }
     
     // CoreData
@@ -90,7 +101,7 @@ class TodoListViewController: SwipeTableViewController{
         }
     }
     func realmLoadItems(){
-        realmItems = selectedRealmCategory?.items.sorted(byKeyPath: "title", ascending: true)
+        realmItems = selectedRealmCategory?.items.sorted(byKeyPath: "createdDate", ascending: true)
     }
     
     // MARK: - tableView dataSource
@@ -115,9 +126,18 @@ class TodoListViewController: SwipeTableViewController{
         if let item = realmItems?[indexPath.row]{
             cell.textLabel?.text = item.title
             cell.accessoryType = item.done ? .checkmark : .none
+            if let color = UIColor(hexString: selectedRealmCategory!.color){
+                let darkenColor = color.darken(byPercentage: CGFloat(indexPath.row)/50.0)
+                
+                cell.backgroundColor = darkenColor
+                cell.textLabel?.textColor = ContrastColorOf(darkenColor ?? FlatSkyBlue(), returnFlat: true)
+            }
+            
         }else{
             cell.textLabel?.text = "no item yet"
+            cell.backgroundColor = UIColor(named: "red")
         }
+        
         
         return cell
     }

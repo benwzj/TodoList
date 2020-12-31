@@ -8,6 +8,7 @@
 import UIKit
 import CoreData
 import RealmSwift
+import ChameleonFramework
 
 class CategoryViewController: SwipeTableViewController {
     override func viewDidLoad() {
@@ -19,6 +20,12 @@ class CategoryViewController: SwipeTableViewController {
         
         //realm
         realmLoadCategory()
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        guard let navBar = navigationController?.navigationBar else {
+            fatalError("navigatinBar is not ready")
+        }
+        navBar.backgroundColor = UIColor(hexString: "1D9BF6")
     }
     
     // CoreData
@@ -48,6 +55,7 @@ class CategoryViewController: SwipeTableViewController {
     func realmAddCategory (with name: String){
         let newCategory = RealmCategory()
         newCategory.name = name
+        newCategory.color = UIColor.randomFlat().hexValue()
 
         do {
             try realm.write{
@@ -104,7 +112,11 @@ class CategoryViewController: SwipeTableViewController {
         // realm
         let text = realmCategorys?[indexPath.row].name ?? "no Category yet"
         cell.textLabel?.text = text
-
+        if let cellColor = UIColor(hexString: realmCategorys?[indexPath.row].color ?? "6EC2F8"){
+            cell.textLabel?.textColor = ContrastColorOf(cellColor, returnFlat: true)
+            cell.backgroundColor = cellColor
+        }
+        
         return cell
     }
     
@@ -112,6 +124,7 @@ class CategoryViewController: SwipeTableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "goToItems", sender: self)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destinationVC =  segue.destination as! TodoListViewController
